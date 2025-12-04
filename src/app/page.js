@@ -19,9 +19,25 @@ export default function Home() {
   };
 
   return (
-      <>
+      /*<>
         🎵 Spotify Taste Mixer
-      </>  
+      </> */
+    <main
+      className="min-h-screen flex items-center justify-center bg-black text-white"
+    >
+      <div className="text-center">
+        <h1 className="text-2xl font-bold mb-4">
+          🎵 Spotify Taste Mixer
+        </h1>
+
+        <button
+          onClick={handleLogin}
+          className="px-4 py-2 rounded bg-green-500 text-black font-semibold"
+        >
+          Iniciar sesión con Spotify
+        </button>
+      </div>
+    </main>   
   );
 }
 

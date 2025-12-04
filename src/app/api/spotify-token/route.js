@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Buffer } from 'buffer';
 
 export async function POST(request) {
   try {
