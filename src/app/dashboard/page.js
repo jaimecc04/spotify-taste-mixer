@@ -9,6 +9,7 @@ import GenreWidget from "@/components/widgets/GenreWidget";
 import PopularityWidget from "@/components/widgets/PopularityWidget";
 import DecadeWidget from "@/components/widgets/DecadeWidget";
 import ArtistWidget from "@/components/widgets/ArtistWidget";
+import TrackWidget from "@/components/widgets/TrackWidget";
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -17,6 +18,7 @@ export default function DashboardPage() {
     const [popularityRange, setPopularityRange] = useState([50, 80]);
     const [selectedDecades, setSelectedDecades] = useState([]);
     const [selectedArtists, setSelectedArtists] = useState([]);
+    const [selectedTracks, setSelectedTracks] = useState([]);
 
     const [activeSection, setActiveSection] = useState("genres"); //genres, popularity, decades
 
@@ -54,6 +56,13 @@ export default function DashboardPage() {
                     <ArtistWidget
                         selectedArtists={selectedArtists}
                         onChange={setSelectedArtists}
+                    />
+                );
+            case "tracks":
+                return (
+                    <TrackWidget
+                        selectedTracks={selectedTracks}
+                        onChange={setSelectedTracks}
                     />
                 );
             default:
@@ -122,6 +131,18 @@ export default function DashboardPage() {
                             >
                                 Artistas
                             </button>
+                            
+                            <button
+                                type="button"
+                                onClick={() => setActiveSection('tracks')}
+                                className={`text-left px-3 py-2 rounded ${
+                                    activeSection === 'tracks'
+                                    ? 'bg-green-500 text-black'
+                                    : 'bg-neutral-800 hover:bg-neutral-700'
+                                }`}
+                            >
+                                Canciones
+                            </button>
 
                         </div>
                     </aside>
@@ -145,7 +166,8 @@ export default function DashboardPage() {
                                 selectedGenres,
                                 popularityRange,
                                 selectedDecades,
-                                artists: selectedArtists.map(a => a.name)
+                                artists: selectedArtists.map(a => a.name),
+                                tracks: selectedTracks.map(t => t.name)
                             }, 
                             null,
                             2
