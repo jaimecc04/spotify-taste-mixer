@@ -8,6 +8,7 @@ import { isAuthenticated } from "@/lib/auth";
 import GenreWidget from "@/components/widgets/GenreWidget";
 import PopularityWidget from "@/components/widgets/PopularityWidget";
 import DecadeWidget from "@/components/widgets/DecadeWidget";
+import ArtistWidget from "@/components/widgets/ArtistWidget";
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -15,6 +16,7 @@ export default function DashboardPage() {
     const [selectedGenres, setSelectedGenres] = useState([]);
     const [popularityRange, setPopularityRange] = useState([50, 80]);
     const [selectedDecades, setSelectedDecades] = useState([]);
+    const [selectedArtists, setSelectedArtists] = useState([]);
 
     const [activeSection, setActiveSection] = useState("genres"); //genres, popularity, decades
 
@@ -45,6 +47,13 @@ export default function DashboardPage() {
                     <DecadeWidget
                         selectedDecades={selectedDecades}
                         onChange={setSelectedDecades}
+                    />
+                );
+            case "artists":
+                return (
+                    <ArtistWidget
+                        selectedArtists={selectedArtists}
+                        onChange={setSelectedArtists}
                     />
                 );
             default:
@@ -102,6 +111,18 @@ export default function DashboardPage() {
                                 Popularidad
                             </button>
 
+                            <button
+                                type="button"
+                                onClick={() => setActiveSection('artists')}
+                                className={`text-left px-3 py-2 rounded ${
+                                    activeSection === 'artists'
+                                    ? 'bg-green-500 text-black'
+                                    : 'bg-neutral-800 hover:bg-neutral-700'
+                                }`}
+                            >
+                                Artistas
+                            </button>
+
                         </div>
                     </aside>
                     
@@ -119,7 +140,16 @@ export default function DashboardPage() {
                     </p>
 
                     <pre className="text-[10px] bg-black/40 rounded p-2 overflow-x-auto">
-                        {JSON.stringify({ selectedGenres, popularityRange, selectedDecades }, null, 2)}
+                        {JSON.stringify(
+                            { 
+                                selectedGenres,
+                                popularityRange,
+                                selectedDecades,
+                                artists: selectedArtists.map(a => a.name)
+                            }, 
+                            null,
+                            2
+                        )}
                     </pre>
                 </div>
 
