@@ -10,6 +10,9 @@ import PopularityWidget from "@/components/widgets/PopularityWidget";
 import DecadeWidget from "@/components/widgets/DecadeWidget";
 import ArtistWidget from "@/components/widgets/ArtistWidget";
 import TrackWidget from "@/components/widgets/TrackWidget";
+import PlaylistDisplay from "@/components/PlaylistDisplay";
+
+import { generatePlaylist } from "@/lib/spotify";
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -22,13 +25,64 @@ export default function DashboardPage() {
 
     const [activeSection, setActiveSection] = useState("genres"); //genres, popularity, decades
 
+    const [playlist, setPlaylist] = useState([]);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [playlistError, setPlaylistError] = useState(null);
+
     useEffect(() => {
         if (!isAuthenticated()) {
             router.push("/");
         }
     }, [router]);
 
-    const renderActiveSection = () => {
+     const buildPreferences = () => ({
+        artists: selectedArtists,
+        tracks: selectedTracks,
+        genres: selectedGenres,
+        decades: selectedDecades,
+        popularity: popularityRange,
+    });
+
+    const handleGeneratePlaylist = async (mode = 'replace') => {
+        try {
+            setIsGenerating(true);
+            setPlaylistError(null);
+
+            const preferences = buildPreferences();
+            if (preferences.genres.length === 0) {
+                preferences.genres = ["pop"];
+                return;
+            }
+            const tracks = await generatePlaylist(preferences);
+
+
+            if (mode === 'replace') {
+                setPlaylist(tracks)
+            } else{
+                setPlaylist((prev) => {
+                    const map = new Map();
+                    [...prev, ...tracks].forEach((t) => {
+                        map.set(t.id, t);
+                    });
+                    return Array.from(map.values());
+                });
+            }
+        } catch (error) {
+            console.error("Error generating playlist:", error);
+            setPlaylistError(error.message || "Hubo un error al generar la playlist.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const handleRemoveTrack = (trackId) => {
+        setPlaylist((prev) => prev.filter((t) => t.id !== trackId));
+    };
+
+    const handleRefresh = () => handleGeneratePlaylist('replace');
+    const handleAddMore = () => handleGeneratePlaylist('append');
+
+    const renderActiveWidget = () => {
         switch (activeSection) {
             case "genres":
                 return (
@@ -69,6 +123,7 @@ export default function DashboardPage() {
                 return null;
         }
     };
+
 
     return (
         <div className="p-6 space-y-6">
@@ -144,37 +199,33 @@ export default function DashboardPage() {
                                 Canciones
                             </button>
 
+                            <button
+                                type="button"
+                                onClick={() => handleGeneratePlaylist('replace')}
+                                className="mt-4 w-full text-center text-xs px-3 py-2 rounded bg-emerald-500 text-black font-semibold disabled_opacity-50"
+                                disabled={isGenerating}
+                            >
+                                Generar Playlist
+                            </button>
+
                         </div>
                     </aside>
                     
                     {/*Widget activo*/}
                     <section className="flex-1">
-                        {renderActiveSection()}
+                        {renderActiveWidget()}
                     </section>
                 </div>
 
                 {/*Columna derecha - Playlist*/}
-                <div className="w-64 bg-neutral-900 border border-neutral-800 rounded-xl p-4">
-                    <h2 className="font-semibold mb-2">Playlist</h2>
-                    <p className="text-neutral-500 text-sm mb-2">
-                        Aquí se mostrará la playlist generada según los filtros seleccionados.
-                    </p>
-
-                    <pre className="text-[10px] bg-black/40 rounded p-2 overflow-x-auto">
-                        {JSON.stringify(
-                            { 
-                                selectedGenres,
-                                popularityRange,
-                                selectedDecades,
-                                artists: selectedArtists.map(a => a.name),
-                                tracks: selectedTracks.map(t => t.name)
-                            }, 
-                            null,
-                            2
-                        )}
-                    </pre>
-                </div>
-
+                <PlaylistDisplay
+                    playlist={playlist}
+                    onRemoveTrack={handleRemoveTrack}
+                    onRefresh={handleRefresh}
+                    onAddMore={handleAddMore}
+                    isLoading={isGenerating}
+                    error={playlistError}
+                />
             </div>
         </div>
     );
