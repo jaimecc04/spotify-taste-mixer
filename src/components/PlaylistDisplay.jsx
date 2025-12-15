@@ -1,20 +1,25 @@
 'use client'
 
-import { use, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import TrackCard from "./TrackCard"
 
 export default function PlaylistDisplay({ playlist, onRemoveTrack, onRefresh, onAddMore, isLoading, error }) {
-    const [favoriteTrackIds, setFavoriteTrackIds] = useState();
+    const [favoriteTrackIds, setFavoriteTrackIds] = useState([]);
 
     useEffect(() => {
-        const stored = JSON.parse(localStorage.getItem('favorite_tracks') || '[]');
-        setFavoriteTrackIds(stored.map((t) => t.id));
+        const stored = JSON.parse(
+            localStorage.getItem('favorite_tracks') || '[]'
+        );
+        const ids = Array.isArray(stored) ? stored.map((t) => t.id) : [];
+        setFavoriteTrackIds(ids);
     }, []);
 
     const handletoggleFavorite = (track) => {
         const stored = JSON.parse(
-        localStorage.getItem('favorite_tracks') || '[]'
+            localStorage.getItem('favorite_tracks') || '[]'
         );
+        const list = Array.isArray(stored) ? stored : [];
+
         const exists = stored.find((t) => t.id === track.id);
 
         let updated;
@@ -26,6 +31,8 @@ export default function PlaylistDisplay({ playlist, onRemoveTrack, onRefresh, on
 
         localStorage.setItem('favorite_tracks', JSON.stringify(updated));
         setFavoriteTrackIds(updated.map((t) => t.id));
+
+        const safeFavoriteIds = Array.isArray(favoriteTrackIds) ? favoriteTrackIds : [];
     };
 
     const handleRemoveFromPlaylist = (track) => {
@@ -60,12 +67,22 @@ export default function PlaylistDisplay({ playlist, onRemoveTrack, onRefresh, on
                 </div>
             </div>
 
-            {isLoading && (<p className="text-xs text-neutral-400 mb-2">Generando playlist...</p>)}
+            {isLoading && (
+                <p className="text-xs text-neutral-400 mb-2">
+                    Generando playlist...
+                </p>
+            )}
 
-            {error && (<p className="text-xs text-red-400 mb-2">Error: {error}</p>)}
+            {error && (
+                <p className="text-xs text-red-400 mb-2">
+                    Error: {error}
+                </p>
+            )}
 
             {playlist.length === 0 && !isLoading && !error && (
-                <p className="text-xs text-neutral-400">No hay canciones en la playlist. Genera una con tus widgets.</p>
+                <p className="text-xs text-neutral-400">
+                    No hay canciones en la playlist. Genera una con tus widgets.
+                </p>
             )}
 
             <div className="flex-1 overflow-y-auto space-y-2">

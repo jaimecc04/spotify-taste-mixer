@@ -11,6 +11,7 @@ import DecadeWidget from "@/components/widgets/DecadeWidget";
 import ArtistWidget from "@/components/widgets/ArtistWidget";
 import TrackWidget from "@/components/widgets/TrackWidget";
 import PlaylistDisplay from "@/components/PlaylistDisplay";
+import FavoriteDisplay from "@/components/FavoriteDisplay";
 
 import { generatePlaylist } from "@/lib/spotify";
 
@@ -28,6 +29,8 @@ export default function DashboardPage() {
     const [playlist, setPlaylist] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [playlistError, setPlaylistError] = useState(null);
+
+    const [showFavorites, setShowFavorites] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -201,7 +204,22 @@ export default function DashboardPage() {
 
                             <button
                                 type="button"
-                                onClick={() => handleGeneratePlaylist('replace')}
+                                onClick={() => setShowFavorites(true)}
+                                className={`text-left px-3 py-2 rounded mt-2 ${
+                                    showFavorites
+                                    ? 'bg-green-500 text-black'
+                                    : 'bg-neutral-800 hover:bg-neutral-700'
+                                }`}
+                            >
+                                Favoritos
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowFavorites(false);
+                                    handleGeneratePlaylist('replace')}
+                                }
                                 className="mt-4 w-full text-center text-xs px-3 py-2 rounded bg-emerald-500 text-black font-semibold disabled_opacity-50"
                                 disabled={isGenerating}
                             >
@@ -217,15 +235,19 @@ export default function DashboardPage() {
                     </section>
                 </div>
 
-                {/*Columna derecha - Playlist*/}
-                <PlaylistDisplay
-                    playlist={playlist}
-                    onRemoveTrack={handleRemoveTrack}
-                    onRefresh={handleRefresh}
-                    onAddMore={handleAddMore}
-                    isLoading={isGenerating}
-                    error={playlistError}
-                />
+                {/*Columna derecha - Favoritos o Playlist*/}
+                {showFavorites ? (
+                <FavoriteDisplay />
+                ) : (
+                    <PlaylistDisplay
+                        playlist={playlist}
+                        onRemoveTrack={handleRemoveTrack}
+                        onRefresh={handleRefresh}
+                        onAddMore={handleAddMore}
+                        isLoading={isGenerating}
+                        error={playlistError}
+                    />
+                )}
             </div>
         </div>
     );
