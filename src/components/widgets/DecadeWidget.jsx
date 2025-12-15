@@ -11,9 +11,23 @@ export default function DecadeWidget({ selectedDecades, onChange }) {
         }
     };
 
+    const handleClear = () => {
+        onChange([]);
+    };
+
     return (
         <div className="bbg-neutral-900 border border-neutral-800 rounded-x1 p-4 h-full">
-            <h2 className="font-semibold mb-2">Décadas</h2>
+            <div className="flex items-center justify-between mb-2">
+                <h2 className="font-semibold mb-2">Décadas</h2>
+                <button
+                    type="button"
+                    onClick={handleClear}
+                    className="text-xs opacity-60 hover:opacity-100 px-2 py-1 rounded-md mb-3"
+                >
+                    Borrar selección
+                </button>
+            </div>
+
             <div className="flex flex-wrap gap-2">
                 {DECADES.map((decade) => {
                     const active = selectedDecades.includes(decade);

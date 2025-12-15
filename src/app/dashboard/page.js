@@ -43,30 +43,46 @@ export default function DashboardPage() {
         tracks: selectedTracks,
         genres: selectedGenres,
         decades: selectedDecades,
-        popularity: popularityRange,
+        //popularity: popularityRange,
+        ...(popularityRange ? { popularity: popularityRange } : {}),
     });
 
     const handleGeneratePlaylist = async (mode = 'replace') => {
         try {
+
+            if(
+                selectedArtists.length === 0 &&
+                selectedGenres.length === 0 &&
+                selectedDecades.length === 0 &&
+                selectedTracks.length === 0
+            )   {
+                setPlaylistError("Por favor selecciona al menos un género, artista, década o canción para generar una playlist.");
+                return;
+            }
+
             setIsGenerating(true);
             setPlaylistError(null);
 
             const preferences = buildPreferences();
-            if (preferences.genres.length === 0) {
-                preferences.genres = ["pop"];
-                return;
-            }
+            
             const tracks = await generatePlaylist(preferences);
+            
+            const combinedTracks = (() => {
+                const map = new Map();
+                selectedTracks.forEach((t) => map.set(t.id, t));
+                (tracks || []).forEach((t) => map.set(t.id, t));
+                return Array.from(map.values());
+            })();
 
 
             if (mode === 'replace') {
-                setPlaylist(tracks)
+                setPlaylist(combinedTracks)
             } else{
                 setPlaylist((prev) => {
                     const map = new Map();
-                    [...prev, ...tracks].forEach((t) => {
-                        map.set(t.id, t);
-                    });
+                    prev.forEach((t) => map.set(t.id, t));
+                    selectedTracks.forEach((t) => map.set(t.id, t));
+                    (tracks || []).forEach((t) => map.set(t.id, t));
                     return Array.from(map.values());
                 });
             }
@@ -84,6 +100,7 @@ export default function DashboardPage() {
 
     const handleRefresh = () => handleGeneratePlaylist('replace');
     const handleAddMore = () => handleGeneratePlaylist('append');
+    const handleClearPlaylist = () => setPlaylist([]);
 
     const renderActiveWidget = () => {
         switch (activeSection) {
@@ -204,7 +221,7 @@ export default function DashboardPage() {
 
                             <button
                                 type="button"
-                                onClick={() => setShowFavorites(true)}
+                                onClick={() => setShowFavorites((prev) => !prev)}
                                 className={`text-left px-3 py-2 rounded mt-2 ${
                                     showFavorites
                                     ? 'bg-green-500 text-black'
@@ -220,7 +237,7 @@ export default function DashboardPage() {
                                     setShowFavorites(false);
                                     handleGeneratePlaylist('replace')}
                                 }
-                                className="mt-4 w-full text-center text-xs px-3 py-2 rounded bg-emerald-500 text-black font-semibold disabled_opacity-50"
+                                className="mt-4 w-full text-center text-xs px-3 py-2 rounded bg-emerald-500 text-black font-semibold disabled:opacity-50"
                                 disabled={isGenerating}
                             >
                                 Generar Playlist
@@ -241,6 +258,7 @@ export default function DashboardPage() {
                 ) : (
                     <PlaylistDisplay
                         playlist={playlist}
+                        onClearPlaylist={handleClearPlaylist}
                         onRemoveTrack={handleRemoveTrack}
                         onRefresh={handleRefresh}
                         onAddMore={handleAddMore}

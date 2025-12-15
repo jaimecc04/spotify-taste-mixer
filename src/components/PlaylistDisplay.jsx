@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import TrackCard from "./TrackCard"
 
-export default function PlaylistDisplay({ playlist, onRemoveTrack, onRefresh, onAddMore, isLoading, error }) {
+export default function PlaylistDisplay({ playlist, onRemoveTrack, onRefresh, onAddMore, isLoading, error, onClearPlaylist }) {
     const [favoriteTrackIds, setFavoriteTrackIds] = useState([]);
 
     useEffect(() => {
@@ -20,19 +20,14 @@ export default function PlaylistDisplay({ playlist, onRemoveTrack, onRefresh, on
         );
         const list = Array.isArray(stored) ? stored : [];
 
-        const exists = stored.find((t) => t.id === track.id);
+        const exists = list.some((t) => t.id === track.id);
 
-        let updated;
-        if(exists){
-            updated = stored.filter((t) => t.id !== track.id);
-        } else{
-            updated = [...stored, track];
-        }
+        const updated = exists
+            ? list.filter((t) => t.id !== track.id)
+            : [...list, track];
 
         localStorage.setItem('favorite_tracks', JSON.stringify(updated));
         setFavoriteTrackIds(updated.map((t) => t.id));
-
-        const safeFavoriteIds = Array.isArray(favoriteTrackIds) ? favoriteTrackIds : [];
     };
 
     const handleRemoveFromPlaylist = (track) => {
@@ -47,6 +42,14 @@ export default function PlaylistDisplay({ playlist, onRemoveTrack, onRefresh, on
             <div className="flex justify-between items-center mb-3">
                 <h2 className="font-semibold">Playlist</h2>
                 <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={onClearPlaylist}
+                        disabled={isLoading || playlist.length === 0}
+                        className="text-xs px-2 py-1 rounded bg-neutral-800 disable:opacity-50"
+                    >
+                        Borrar
+                    </button>
                     <button
                         type="button"
                         onClick={onRefresh}

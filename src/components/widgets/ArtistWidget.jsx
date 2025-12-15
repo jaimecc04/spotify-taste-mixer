@@ -43,9 +43,22 @@ export default function ArtistWidget({ selectedArtists, onChange }) {
         }
     };
 
+    const handleClear = () => {
+        onChange([]);
+    };
+
     return (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-x1 p-4 h-full flex flex-col">
-            <h2 className="font-semibold mb-2">Artistas</h2>
+        <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-2">
+                <h2 className="font-semibold mb-2">Artistas</h2>
+                <button
+                    type="button"
+                    onClick={handleClear}
+                    className="text-xs opacity-60 hover:opacity-100 px-2 py-1 rounded-md"
+                >
+                    Borrar selección
+                </button>
+            </div>
 
             <input
                 type="text"
@@ -84,6 +97,7 @@ export default function ArtistWidget({ selectedArtists, onChange }) {
                 {!loading && results.length === 0 && query && (
                     <p className="text-xs text-neutral-500">No se encontraron artistas.</p>
                 )}
+
             </div>          
                 
             {selectedArtists.length > 0 && (
